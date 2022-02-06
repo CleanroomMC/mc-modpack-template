@@ -86,7 +86,7 @@ for mod in manifest["externalDeps"]:
             r = requests.get(mod["url"])
 
             hash = hashlib.sha256(jar.read()).hexdigest()
-            if str(hash) == mod["hash"]: TODO fix
+            if str(hash) == mod["hash"]:
                 jar.write(r.content)
                 modlist.append(mod["name"])
                 print("hash succsessful")
