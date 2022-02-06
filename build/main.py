@@ -212,7 +212,10 @@ print('server zip "%s.zip" made' % (archive))
 
 if (args.dev_build):
     mkdirs(basePath + "/buildOut/mmc/minecraft")
-    shutil.rmtree(basePath + "/buildOut/mmc/minecraft/mods/")
+    try:
+        shutil.rmtree(basePath + "/buildOut/mmc/minecraft/mods/")
+    except:
+        pass
     shutil.copytree(basePath + "/buildOut/server/mods/", basePath + "/buildOut/mmc/minecraft/mods/")
     for dir in copyDirs:
         try:
