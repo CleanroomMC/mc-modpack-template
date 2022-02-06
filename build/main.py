@@ -19,6 +19,7 @@ def parse_args():
     parser.add_argument("--name", type=str, help="append name to zips")
     parser.add_argument("--retries", type=int, default=3, help="download attempts before failure")
     parser.add_argument("--clean", action="store_true", help="clean output dirs")
+    parser.add_argument("--dev_build", action="store_true", help="makes a folder with all the files symlinked for development. probally only works on linux")
     return parser.parse_args()
 
 
@@ -30,6 +31,7 @@ basePath = os.path.normpath(os.path.realpath(__file__)[:-7] + "..")
 copyDirs = ["/scripts", "/resources", "/config", "/mods", "/structures"]
 serverCopyDirs = ["/scripts", "/config", "/mods", "/structures"]
 modURLlist = []
+modClientOnly = []
 
 if args.clean:
     shutil.rmtree(basePath + "/buildOut/client/overrides", ignore_errors=True)
@@ -117,6 +119,10 @@ for mod in manifest["files"]:
     metadata = json.loads(r.text)
     modlist.append(metadata["FileName"])
     modURLlist.append(metadata["DownloadURL"])
+    try:
+        modClientOnly.append(mod["clientOnly"])
+    except:
+        modClientOnly.append(False)
 
 print("modlist compiled")
 
@@ -141,8 +147,10 @@ for dir in serverCopyDirs:
         print("Directory exists, skipping")
 print("directories copied to buildOut/server")
 
-for mod in modURLlist:
+for i, mod in enumerate(modURLlist):
     jarname = mod.split("/")[-1]
+    if (modClientOnly[i] == True):
+        break
 
     if os.path.exists(os.path.join(cachepath, jarname)):
         shutil.copy2(os.path.join(cachepath, jarname), os.path.join(basePath, "buildOut", "server", "mods", jarname))
@@ -201,4 +209,33 @@ if sha:
     archive = "%s-%s" % (archive, sha)
 shutil.make_archive(archive, "zip", basePath + "/buildOut/server")
 print('server zip "%s.zip" made' % (archive))
+
+if (args.dev_build):
+    mkdirs(basePath + "/buildOut/mmc/minecraft")
+    shutil.rmtree(basePath + "/buildOut/mmc/minecraft/mods/")
+    shutil.copytree(basePath + "/buildOut/server/mods/", basePath + "/buildOut/mmc/minecraft/mods/")
+    for dir in copyDirs:
+        try:
+            os.symlink(basePath + dir, basePath + "/buildOut/mmc/minecraft/" + dir)
+        except Exception as e:
+            print("Directory exists, skipping")
+        print("directories copied to buildOut/mmc/minecraft")
+
+    for i, mod in enumerate(modURLlist):
+        jarname = mod.split("/")[-1]
+        if (modClientOnly[i] == False):
+            break
+
+        with open(basePath + "/buildOut/mmc/minecraft/mods/" + jarname, "w+b") as jar:
+            r = requests.get(mod)
+            jar.write(r.content)
+            print(mod + " Downloaded")
+
+    shutil.copy(basePath + "/mmc-instance-data.json", basePath + "/buildOut/mmc/mmc-pack.json")
+    instanceFolder = input("What is your MultiMC instance folder:")
+    instanceName = input("What do you want to call the instance:")
+    os.symlink(basePath + "/buildOut/mmc/", instanceFolder + "/" + instanceName)
+    print("you might need to add an instance.cfg for mmc to reconise it")
+
+
 print("done")
