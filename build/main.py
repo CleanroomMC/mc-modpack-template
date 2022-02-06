@@ -121,7 +121,7 @@ for mod in manifest["files"]:
 print("modlist compiled")
 
 with open(basePath + "/buildOut/modlist.html", "w") as file:
-    data = "<html><body><h1>GregTech CEu Community Pack modlist</h1><ul>"
+    data = "<html><body><h1>Modlist</h1><ul>"
     for mod in modlist:
         data += "<li>" + mod + "</li>"
     data += "</ul></body></html>"
