@@ -117,7 +117,13 @@ for mod in manifest["files"]:
     url = "https://cursemeta.dries007.net/" + str(mod["projectID"]) + "/" + str(mod["fileID"]) + ".json"
     r = requests.get(url)
     metadata = json.loads(r.text)
-    modlist.append(metadata["FileName"])
+    if "name" in mod:
+        name = mod["name"]
+        if name[-4:] != ".jar":
+            name += ".jar"
+        modlist.append(name)
+    else:
+        modlist.append(metadata["FileName"])
     modURLlist.append(metadata["DownloadURL"])
     try:
         modClientOnly.append(mod["clientOnly"])
@@ -129,7 +135,7 @@ print("modlist compiled")
 with open(basePath + "/buildOut/modlist.html", "w") as file:
     data = "<html><body><h1>Modlist</h1><ul>"
     for mod in modlist:
-        data += "<li>" + mod + "</li>"
+        data += "<li>" + mod.split(".jar")[0] + "</li>"
     data += "</ul></body></html>"
     file.write(data)
 
