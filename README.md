@@ -4,7 +4,8 @@ A template for a mc modpack with an intergrated buildscript written in python
 ## instructions for use
 1. you need to have python3 and requests installed
 2. you need to supply a manifest.json, generated or handmade
-3. create override folders, in the format `<root>/scripts, <root>/config`
+3. you need to have a CurseForge API key in the envar `CFAPIKEY` for server pack building
+4. create override folders, in the format `<root>/scripts, <root>/config`
 
 ## custom deps
 the format for custom deps is
